@@ -74,13 +74,13 @@ const UpdatePost = () => {
   const handleSubmitPost = async (e) => {
     e.preventDefault();
     if (
-      [title, category, content].some((field) => !field || field.trim() === "")
+      [title, category, content, imageURL].some((field) => !field || field.trim() === "")
     ) {
       console.log("All fields are required...");
       return;
     }
 
-    if (!imageURL) {
+    if (postImage && !imageURL) {
       toast.info("Please wait for the image to finish uploading.");
       console.log(imageURL)
       return;
