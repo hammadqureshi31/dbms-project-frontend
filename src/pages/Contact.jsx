@@ -1,9 +1,59 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import { RiHomeOfficeFill } from "react-icons/ri";
 import { MdLocalPostOffice } from "react-icons/md";
 import { GrPhone } from "react-icons/gr";
+import { backendPort } from "../config";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 const Contact = () => {
+  const selector = useSelector((state) => state.currentUser.data);
+  const [currentUser, setCurrentUser] = useState();
+
+  useEffect(()=>{
+    if(selector){
+      setCurrentUser(selector);
+    }
+  }, [selector])
+
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+    },
+    validationSchema: Yup.object({
+      name: Yup.string().max(20, "Must be 20 characters or less").required("Required"),
+      email: Yup.string().email("Invalid email address").required("Required"),
+      subject: Yup.string().max(10, "Must be 10 characters or less").required("Required"),
+      message: Yup.string().min(20, "Must be at least 20 characters").required("Required"),
+    }),
+    onSubmit: (values) => {
+      const { name, email, subject, message } = values;
+
+      const contactAdmin = async () => {
+        try {
+          axios.defaults.withCredentials = true;
+          await axios.post(`${backendPort}/user/contact`, {
+            name,
+            email,
+            subject,
+            message,
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
+      if (currentUser) {
+        contactAdmin();
+      }
+    },
+  });
+
   return (
     <div>
       <div className="mx-auto flex flex-col justify-center text-center gap-5 py-10">
@@ -12,14 +62,13 @@ const Contact = () => {
             Contact us
           </h2>
           <h1
-            className="font-raleway text-[#333333] font-bold text-2xl px-5
-           sm:text-3xl sm:mx-auto md:text-4xl lg:text-5xl"
+            className="font-raleway text-[#333333] font-bold text-2xl px-5 sm:text-3xl sm:mx-auto md:text-4xl lg:text-5xl"
           >
             Get in Touch
           </h1>
           <p
             className="font-roboto text-[#999999] mx-auto w-72 text-xs flex justify-center text-center 
-          md:text-sm md:w-96"
+            md:text-sm md:w-96"
           >
             Contact us to publish your content and show ads on our website and
             get a good reach.
@@ -77,7 +126,7 @@ const Contact = () => {
           <h2 className="text-3xl font-raleway font-bold text-[#333333] mb-6 text-center">
             Contact Us
           </h2>
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={formik.handleSubmit}>
             <div>
               <label
                 htmlFor="name"
@@ -89,9 +138,18 @@ const Contact = () => {
                 type="text"
                 id="name"
                 name="name"
-                className="w-full px-4 py-2 border border-[#cccccc] rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4]"
-                required
+                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4] ${
+                  formik.touched.name && formik.errors.name
+                    ? "border-red-500"
+                    : "border-[#cccccc]"
+                }`}
+                {...formik.getFieldProps("name")}
               />
+              {formik.touched.name && formik.errors.name ? (
+                <div className="text-red-500 text-sm mt-1">
+                  {formik.errors.name}
+                </div>
+              ) : null}
             </div>
             <div>
               <label
@@ -104,9 +162,18 @@ const Contact = () => {
                 type="email"
                 id="email"
                 name="email"
-                className="w-full px-4 py-2 border border-[#cccccc] rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4]"
-                required
+                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4] ${
+                  formik.touched.email && formik.errors.email
+                    ? "border-red-500"
+                    : "border-[#cccccc]"
+                }`}
+                {...formik.getFieldProps("email")}
               />
+              {formik.touched.email && formik.errors.email ? (
+                <div className="text-red-500 text-sm mt-1">
+                  {formik.errors.email}
+                </div>
+              ) : null}
             </div>
             <div>
               <label
@@ -119,9 +186,18 @@ const Contact = () => {
                 type="text"
                 id="subject"
                 name="subject"
-                className="w-full px-4 py-2 border border-[#cccccc] rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4]"
-                required
+                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4] ${
+                  formik.touched.subject && formik.errors.subject
+                    ? "border-red-500"
+                    : "border-[#cccccc]"
+                }`}
+                {...formik.getFieldProps("subject")}
               />
+              {formik.touched.subject && formik.errors.subject ? (
+                <div className="text-red-500 text-sm mt-1">
+                  {formik.errors.subject}
+                </div>
+              ) : null}
             </div>
             <div>
               <label
@@ -134,9 +210,18 @@ const Contact = () => {
                 id="message"
                 name="message"
                 rows="6"
-                className="w-full resize-none px-4 py-2 border border-[#cccccc] rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4]"
-                required
+                className={`w-full resize-none px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4] ${
+                  formik.touched.message && formik.errors.message
+                    ? "border-red-500"
+                    : "border-[#cccccc]"
+                }`}
+                {...formik.getFieldProps("message")}
               ></textarea>
+              {formik.touched.message && formik.errors.message ? (
+                <div className="text-red-500 text-sm mt-1">
+                  {formik.errors.message}
+                </div>
+              ) : null}
             </div>
             <button
               type="submit"

@@ -70,7 +70,7 @@ const Comments = ({ postId, commentRes }) => {
             >
               <img
                 className="rounded-full w-12 h-12 object-cover"
-                src={`${backendPort}${comment.user?.userImage}`}
+                src={`${comment.user?.userImage}`}
                 alt={`${comment.user?.name}`}
               />
               <div className="flex flex-col w-full">

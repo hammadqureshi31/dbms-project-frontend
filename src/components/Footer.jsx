@@ -28,7 +28,7 @@ const Footer = () => {
             <Button
               text={"Get started"}
               style={
-                "ring-1 ring-white text-white px-3 h-10 py-2 rounded-md flex justify-center text-center sm:px-5"
+                "ring-1 ring-white cursor-pointer text-white px-3 h-10 py-2 rounded-md flex justify-center text-center sm:px-5"
               }
               navigate={"/"}
             />
@@ -73,7 +73,7 @@ const Footer = () => {
               <GrLinkedinOption />
             </a>
             <a
-              href="https://github.com/hammadqureshi31"
+              href="https://github.com/hammadqureshi31?tab=repositories"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-[#7C4EE4] p-2 text-white rounded-full text-xl"

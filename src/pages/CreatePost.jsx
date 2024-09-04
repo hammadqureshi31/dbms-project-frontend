@@ -7,7 +7,7 @@ import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { fetchAllPosts } from "../redux/slices/postSlice";
 import { ToastContainer, toast } from 'react-toastify';
-
+import { uploadImage } from '../firebase/firebase'
 
 
 const CreatePost = () => {
@@ -15,6 +15,7 @@ const CreatePost = () => {
   const [category, setCategory] = useState();
   const [content, setContent] = useState();
   const [postImage, setpostImage] = useState();
+  const [imageURL, setImageURL] = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -24,7 +25,7 @@ const CreatePost = () => {
     uploadImageRef.current.click();
   };
 
-  const handleUploadPostImage = (e) => {
+  const handleUploadPostImage = async(e) => {
     e.preventDefault();
     const postPicture = e.target.files;
     if (!postPicture || postPicture.length === 0) {
@@ -33,10 +34,20 @@ const CreatePost = () => {
     }
 
     const photo = postPicture[0];
-    console.log("photo", photo)
     setpostImage(photo);
-    // e.target.value = null; // Clear the input value to allow re-selecting the same file
+    
+    try {
+      const downloadURL = await uploadImage(photo);
+      if (downloadURL) {
+        console.log(downloadURL);
+        setImageURL(downloadURL);
+      }
+    } catch (err) {
+      toast.error("An error occurred during the image upload.");
+      console.error("Image upload error:", err);
+    }
   };
+
 
   const handleSubmitPost = async (e) => {
     e.preventDefault();
@@ -47,23 +58,22 @@ const CreatePost = () => {
       return;
     }
 
+    if (!imageURL) {
+      toast.info("Please wait for the image to finish uploading.");
+      console.log(imageURL)
+      return;
+    }
+
     try {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("category", category);
-      formData.append("content", content);
-      if (postImage) {
-        formData.append("postImage", postImage);
-      }
 
       axios.defaults.withCredentials = true;
       const postResponse = await axios.post(
         `${backendPortURL}api/post/create`,
-        formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          title,
+          category,
+          content,
+          postImage: imageURL
         }
       );
 

@@ -56,7 +56,7 @@ const DashUsers = () => {
                   </Table.Cell>
                   <Table.Cell>
                     <img
-                      src={`${backendPort}${user.profilePicture}`}
+                      src={`${user.profilePicture}`}
                       alt={user.username}
                       className='w-10 h-10 object-cover rounded-full'
                     />

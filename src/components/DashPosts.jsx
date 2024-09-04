@@ -53,7 +53,7 @@ const DashPosts = () => {
                   <Table.Cell>
                     <Link to={`/blogs/${post._id}`}>
                       <img
-                        src={`${backendPort}${post.postImage}`}
+                        src={`${post.postImage}`}
                         alt={post.title}
                         className="w-24 h-12 object-cover bg-gray-500"
                       />

@@ -43,7 +43,7 @@ const LandingComp = () => {
               {aiPost.title}
             </h1>
             <p className="font-raleway text-sm font-extralight md:pr-52 md:text-sm">
-              {aiPost.content.slice(4, 200)}
+              {aiPost.content.slice(3, 200)}
             </p>
             <Button
               text={"Read more"}
@@ -58,7 +58,7 @@ const LandingComp = () => {
           <div className="animate-pulse bg-gray-300 w-full sm:w-80 md:w-[800px] md:h-[450px] rounded"></div>
         ) : (
           <img
-            src={`${backendPort}${aiPost?.postImage}`}
+            src={`${aiPost?.postImage}`}
             alt=""
             className="sm:w-80 md:w-[800px] md:h-[450px] object-fill z-20"
           />
@@ -79,7 +79,7 @@ const LandingComp = () => {
           {loading ? (
             <div className="animate-pulse h-72 bg-gray-300 rounded w-full"></div>
           ) : (
-            <img src={`${backendPort}${vrPost?.postImage}`} alt="" />
+            <img src={`${vrPost?.postImage}`} alt="" />
           )}
           <div
             className="flex flex-col flex-wrap text-wrap gap-4 py-5 sm:absolute bg-white sm:w-[540px] sm:px-5 sm:rounded-md 
@@ -108,7 +108,7 @@ const LandingComp = () => {
                   {vrPost?.title}
                 </h1>
                 <p className="font-roboto text-xs opacity-55 lg:w-3/4 lg:text-lg">
-                  {vrPost?.content.slice(4, 300) + "..."}
+                  {vrPost?.content.slice(3, 300) + "..."}
                 </p>
                 <Button
                   text={"Read more"}

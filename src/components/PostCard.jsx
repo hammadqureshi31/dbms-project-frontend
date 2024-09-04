@@ -31,7 +31,7 @@ const PostCard = ({ data }) => {
   return (
     <div
       onClick={() => navigate(`/blogs/${postData?._id}`)}
-      className="w-[300px] max-w-[340px] mx-auto p-5 mb-5 cursor-pointer md:mb-10 bg-white rounded-xl flex flex-col gap-4 md:max-w-[320px] group"
+      className="min-w-[300px] max-w-[340px] mx-auto p-5 mb-5 cursor-pointer md:mb-10 bg-white rounded-xl flex flex-col gap-4 md:max-w-[320px] group"
     >
       {/* Skeleton Loading State */}
       {loading ? (
@@ -50,7 +50,7 @@ const PostCard = ({ data }) => {
           {postData?.postImage && (
             <div className="relative">
               <img
-                src={`${backendPort}${postData.postImage}`}
+                src={`${postData.postImage}`}
                 alt={postData.title}
                 className="w-full h-60 object-cover rounded-lg transition-transform duration-300 ease-in-out group-hover:scale-105"
               />

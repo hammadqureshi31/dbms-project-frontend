@@ -299,7 +299,7 @@ const DashboardOverview = () => {
                   </Table.Cell>
                   <Table.Cell>
                     <img
-                      src={`${backendPort}${user.profilePicture}`}
+                      src={`${user.profilePicture}`}
                       alt={user.username}
                       className="w-10 h-10 object-cover rounded-full"
                     />
@@ -390,7 +390,7 @@ const DashboardOverview = () => {
                   <Table.Cell>
                     <Link to={`/blogs/${post._id}`}>
                       <img
-                        src={`${backendPort}${post.postImage}`}
+                        src={`${post.postImage}`}
                         alt={post.title}
                         className="w-24 h-12 object-cover bg-gray-500"
                       />

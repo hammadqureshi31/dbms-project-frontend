@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { backendPort, backendPortURL } from "../config";
+import { backendPortURL } from "../config";
 import { CiImageOn } from "react-icons/ci";
 import axios from "axios";
 import { useNavigate } from "react-router";
-import { Modal, Table, Button } from 'flowbite-react';
-import { HiOutlineExclamationCircle } from 'react-icons/hi';
-import { ToastContainer, toast } from 'react-toastify';
-
-
+import { Modal, Button } from "flowbite-react";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { ToastContainer, toast } from "react-toastify";
+import { uploadImage } from '../firebase/firebase';
 
 const DashProfile = () => {
   const selector = useSelector((state) => state.currentUser.data);
@@ -17,118 +16,118 @@ const DashProfile = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [userIdToDeleteAccount, setUserIdToDeleteAccount] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [imageURL, setImageURL] = useState(null);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState()
-  const [userIdToDeleteAccount, setUserIdToDeleteAccount] = useState();
-  
 
   useEffect(() => {
     if (selector) {
       setUser(selector);
       setUsername(selector.username);
       setEmail(selector.email);
+      setImagePreview(selector.profilePicture);
     }
   }, [selector]);
-
-  const fileInputRef = useRef(null);
 
   const handleClickIcon = () => {
     fileInputRef.current.click();
   };
 
-  const handleChangeProfilePicture = (e) => {
+  const handleChangeProfilePicture = async (e) => {
     e.preventDefault();
-    console.log("file", e.target.files); // Check if files are logged correctly
-
-    const files = e.target.files;
-    if (!files || files.length === 0) {
-      console.error("No file selected or input event is invalid.");
+    const file = e.target.files[0];
+    if (!file) {
+      console.error("No file selected.");
       return;
     }
-
-    const file = files[0];
     setProfilePicture(file);
+    setImagePreview(URL.createObjectURL(file));
+  
+    try {
+      const downloadURL = await uploadImage(file);
+      if (downloadURL) {
+        console.log(downloadURL);
+        setImageURL(downloadURL);
+      }
+    } catch (err) {
+      toast.error("An error occurred during the image upload.");
+      console.error("Image upload error:", err);
+    }
   };
+  
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      ![username, email, password].every(
-        (field) => field && field.trim() !== ""
-      )
-    ) {
-      console.log("All fields required...");
-      toast.error("All fields required...")
+    if (![username, email, password].every((field) => field.trim() !== "")) {
+      toast.error("All fields required...");
+      return;
+    }
+
+    if (!imageURL) {
+      toast.info("Please wait for the image to finish uploading.");
+      console.log(imageURL)
       return;
     }
 
     try {
-      const formData = new FormData();
-      formData.append("username", username);
-      formData.append("email", email);
-      formData.append("password", password);
-
-      if (profilePicture) {
-        formData.append("profilePicture", profilePicture);
-      }
-
       axios.defaults.withCredentials = true;
       const updatedUser = await axios.post(
         `${backendPortURL}user/update/${selector._id}`,
-        formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          username,
+          email,
+          password,
+          profilePicture: imageURL || user.profilePicture,
         }
       );
 
+      toast.success("Profile updated successfully.");
       console.log("Update", updatedUser.data);
     } catch (error) {
+      toast.error("Error in updating profile.");
       console.error("Error in updating profile:", error);
     }
   };
 
-  const handleDeleteAccount = async (e) => {
-    axios.defaults.withCredentials = true;
-    const response = await axios.delete(
-      `${backendPortURL}user/delete/${selector._id}`
-    );
-    console.log("delete res", response);
-    navigate("/");
+  const handleDeleteAccount = async (userId) => {
+    try {
+      axios.defaults.withCredentials = true;
+      await axios.delete(`${backendPortURL}user/delete/${userId}`);
+      toast.success("Account deleted successfully.");
+      navigate("/");
+    } catch (error) {
+      toast.error("Error in deleting account.");
+      console.error("Error in deleting account:", error);
+    }
   };
 
   const handleSignOutUser = async (e) => {
     e.preventDefault();
 
-    axios.defaults.withCredentials = true;
-    const resp = await axios.post(`${backendPortURL}user/signout`);
-
-    console.log("resp on signout", resp);
-    navigate("/");
+    try {
+      axios.defaults.withCredentials = true;
+      await axios.post(`${backendPortURL}user/signout`);
+      navigate("/");
+    } catch (error) {
+      toast.error("Error signing out.");
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
     <>
-      <div className="flex justify-center text-center mt-4">
-        <div className="mx-auto rounded-lg shadow-md p-6 flex flex-col justify-center text-center gap-3 md:w-[400px]">
+      <div className="flex justify-center text-center">
+        <div className="mx-auto rounded-lg shadow-md p-6 bg-white flex flex-col justify-center text-center gap-3 md:w-[400px]">
           <div className="relative">
-            {user && user.profilePicture && (
-              <img
-                className="mx-auto rounded-full h-40 w-40 ring-8 ring-gray-300"
-                src={`${backendPort}${user.profilePicture}`}
-                alt=""
-              />
-            )}
-            {user && !user.profilePicture && (
-              <img
-                src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-                onClick={() => setShowProfile((prev) => !prev)}
-                alt="Profile"
-                className="mx-auto rounded-full h-40 w-40 ring-8 ring-gray-300"
-              />
-            )}
+            <img
+              className="mx-auto rounded-full h-40 w-40 ring-8 ring-gray-300"
+              src={imagePreview || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"}
+              alt="Profile"
+            />
             <div className="absolute bottom-2 p-2 bg-blue-400 text-white rounded-full right-3 cursor-pointer text-2xl md:right-20 md:bottom-1">
               <CiImageOn
                 className="cursor-pointer text-2xl"
@@ -136,9 +135,10 @@ const DashProfile = () => {
               />
               <input
                 type="file"
+                accept="image/*"
                 ref={fileInputRef}
-                onChange={handleChangeProfilePicture} // Use onChange here
-                style={{ display: "none" }} // Hide the input element
+                onChange={handleChangeProfilePicture}
+                style={{ display: "none" }}
               />
             </div>
           </div>
@@ -190,17 +190,17 @@ const DashProfile = () => {
           )}
           <div className="flex justify-between text-center w-full mt-2 text-sm">
             <h4
-              onClick={()=>{
+              onClick={() => {
                 setShowModal(true);
-                setUserIdToDeleteAccount(selector._id)
+                setUserIdToDeleteAccount(selector._id);
               }}
-              className="hover:text-[#7C4EE4] hover:underline"
+              className="hover:text-[#7C4EE4] hover:underline cursor-pointer"
             >
               Delete account
             </h4>
             <h4
               onClick={handleSignOutUser}
-              className="hover:text-[#7C4EE4] hover:underline"
+              className="hover:text-[#7C4EE4] hover:underline cursor-pointer"
             >
               Sign out
             </h4>
@@ -209,22 +209,25 @@ const DashProfile = () => {
 
         <Modal
           show={showModal}
-          onClose={() => setShowModal(false)}
-          popup
           size="md"
+          popup={true}
+          onClose={() => setShowModal(false)}
         >
           <Modal.Header />
           <Modal.Body>
             <div className="text-center">
-              <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto" />
-              <h3 className="mb-5 text-lg text-gray-500 dark:text-gray-400">
-                Are you sure you want to delete account?
+              <HiOutlineExclamationCircle
+                className="mx-auto mb-4 h-14 w-14 text-gray-400"
+                aria-hidden="true"
+              />
+              <h3 className="mb-5 text-lg font-normal text-gray-500">
+                Are you sure you want to delete this account?
               </h3>
               <div className="flex justify-center gap-4">
                 <Button
                   color="failure"
                   onClick={() => {
-                    handleDeleteAccount();
+                    handleDeleteAccount(userIdToDeleteAccount);
                     setShowModal(false);
                   }}
                 >

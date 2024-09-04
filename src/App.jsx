@@ -29,7 +29,7 @@ const App = () => {
         <Provider store={store}>
           <Header />
           <ScrollToTop />
-          <div className="flex-grow bg-gray-50 mt-14 max-w-full pb-5">
+          <div className="flex-grow bg-gray-50 max-w-full pb-5">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />

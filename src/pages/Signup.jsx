@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { backendPortURL } from "../config";
+import useUploadImage from "../firebase/useUploadImage";
 
 const SignupSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is Required"),
@@ -13,24 +14,24 @@ const SignupSchema = Yup.object().shape({
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [role, setRole] = useState("user"); 
+  const [role, setRole] = useState("user");
+  const [file, setFile] = useState(null);
+
+  const { downloadURL, progress, error } = useUploadImage(file);
 
   const handleSubmit = async (values) => {
-    const { name, email, password, file } = values;
-    const formData = new FormData();
-
-    formData.append("username", name);
-    formData.append("email", email);
-    formData.append("password", password);
-    formData.append("profilePicture", file);
-    formData.append("role", role);
+    const { name, email, password } = values;
 
     try {
-      const response = await axios.post(`${backendPortURL}user/signup`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const formData = {
+        username: name,
+        email,
+        password,
+        role,
+        profilePicture: downloadURL,
+      };
+
+      await axios.post(`${backendPortURL}user/signup`, formData);
       navigate(`/user/login`);
     } catch (error) {
       console.log("Something went wrong.", error);
@@ -44,23 +45,18 @@ const Signup = () => {
           Dawn 2 Dusk - Blogs
         </h1>
         <p className="text-lg font-roboto text-center mb-6 text-gray-500">
-          Sign up now to unlock exclusive insights and offers tailored just for
-          you!
+          Sign up now to unlock exclusive insights and offers tailored just for you!
         </p>
 
         <div className="flex justify-between mb-6">
           <button
-            className={`w-full py-2 rounded-l-lg ${
-              role === "user" ? "bg-[#7C4EE4] text-white" : "bg-gray-100 text-[#999999]"
-            }`}
+            className={`w-full py-2 rounded-l-lg ${role === "user" ? "bg-[#7C4EE4] text-white" : "bg-gray-100 text-[#999999]"}`}
             onClick={() => setRole("user")}
           >
             Signup as User
           </button>
           <button
-            className={`w-full py-2 rounded-r-lg ${
-              role === "admin" ? "bg-[#7C4EE4] text-white" : "bg-gray-100 text-[#999999]"
-            }`}
+            className={`w-full py-2 rounded-r-lg ${role === "admin" ? "bg-[#7C4EE4] text-white" : "bg-gray-100 text-[#999999]"}`}
             onClick={() => setRole("admin")}
           >
             Signup as Admin
@@ -68,11 +64,11 @@ const Signup = () => {
         </div>
 
         <Formik
-          initialValues={{ email: "", password: "", name: "" }}
+          initialValues={{ email: "", password: "", name: "", file: null }}
           validationSchema={SignupSchema}
           onSubmit={handleSubmit}
         >
-          {({ isSubmitting }) => (
+          {({ setFieldValue }) => (
             <Form>
               <Field
                 type="text"
@@ -81,11 +77,7 @@ const Signup = () => {
                 placeholder="Name"
                 className="w-full px-4 py-3 mb-3 text-[#7C4EE4] bg-transparent ring-1 ring-[#7C4EE4] rounded-lg focus:outline-none"
               />
-              <ErrorMessage
-                name="name"
-                component="div"
-                className="text-red-400 mb-3"
-              />
+              <ErrorMessage name="name" component="div" className="text-red-400 mb-3" />
 
               <Field
                 type="email"
@@ -94,11 +86,7 @@ const Signup = () => {
                 placeholder="Your Email"
                 className="w-full px-4 py-3 mb-3 text-[#7C4EE4] bg-transparent ring-1 ring-[#7C4EE4] rounded-lg focus:outline-none"
               />
-              <ErrorMessage
-                name="email"
-                component="div"
-                className="text-red-400 mb-3"
-              />
+              <ErrorMessage name="email" component="div" className="text-red-400 mb-3" />
 
               <Field
                 type="password"
@@ -107,27 +95,30 @@ const Signup = () => {
                 placeholder="Choose a Password"
                 className="w-full px-4 py-3 mb-3 text-[#7C4EE4] bg-transparent ring-1 ring-[#7C4EE4] rounded-lg focus:outline-none"
               />
-              <ErrorMessage
-                name="password"
-                component="div"
-                className="text-red-400 mb-3"
+              <ErrorMessage name="password" component="div" className="text-red-400 mb-3" />
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => {
+                  const selectedFile = event.currentTarget.files[0];
+                  setFile(selectedFile);
+                  setFieldValue("file", selectedFile);
+                }}
+                className="w-full px-4 py-2 mb-3 text-gray-500"
               />
 
-              <Field
-                name="file"
-                render={({ field, form }) => (
-                  <input
-                    type="file"
-                    onChange={(event) => {
-                      form.setFieldValue(
-                        "file",
-                        event.currentTarget.files[0]
-                      );
-                    }}
-                    className="w-full px-4 py-2 mb-3 text-gray-500"
-                  />
-                )}
-              />
+              {progress > 0 && (
+                <div className="text-center mb-3">
+                  <p>Image Uploading: {progress.toFixed(0)}%</p>
+                </div>
+              )}
+
+              {error && (
+                <div className="text-red-500 text-center mb-3">
+                  <p>Error uploading image: {error.message}</p>
+                </div>
+              )}
 
               <button
                 type="submit"

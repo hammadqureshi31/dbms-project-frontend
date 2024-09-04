@@ -66,7 +66,7 @@ const ViewPost = () => {
   return (
     <div className="max-w-[1000px] bg-white mx-auto mt-2 p-4 sm:p-6 lg:p-8">
       {/* Category and Date */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
         <h3 className="text-lg font-roboto uppercase font-semibold text-[#7C4EE4] mb-2 sm:mb-0">
           {postData.category}
         </h3>
@@ -83,7 +83,7 @@ const ViewPost = () => {
       {/* Post Image */}
       {postData.postImage && (
         <img
-          src={`${backendPort}${postData.postImage}`}
+          src={`${postData.postImage}`}
           alt={postData.title}
           className="min-w-full max-h-[450px] object-fill rounded-lg mb-6"
         />

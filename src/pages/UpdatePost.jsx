@@ -7,6 +7,8 @@ import { useNavigate, useParams } from "react-router";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { fetchAllPosts } from "../redux/slices/postSlice";
+import { uploadImage } from '../firebase/firebase';
+import { ToastContainer, toast } from 'react-toastify';
 
 const UpdatePost = () => {
   const [title, setTitle] = useState("");
@@ -14,6 +16,7 @@ const UpdatePost = () => {
   const [content, setContent] = useState("");
   const [postImage, setPostImage] = useState(null);
   const [blogpost, setBlogpost] = useState(null);
+  const [imageURL, setImageURL] = useState(null);
   const navigate = useNavigate();
   const { id } = useParams();
   const selector = useSelector((state) => state.blogPosts.data);
@@ -41,12 +44,11 @@ const UpdatePost = () => {
         setCategory(blog[0].category);
       } else {
         console.error("No blog post found with the provided ID");
-        // Optional: navigate or show an error message
       }
     }
   }, [selector, id]);
 
-  const handleUploadPostImage = (e) => {
+  const handleUploadPostImage = async (e) => {
     e.preventDefault();
     const postPicture = e.target.files;
     if (!postPicture || postPicture.length === 0) {
@@ -56,6 +58,17 @@ const UpdatePost = () => {
 
     const photo = postPicture[0];
     setPostImage(photo);
+
+    try {
+      const downloadURL = await uploadImage(photo);
+      if (downloadURL) {
+        console.log(downloadURL);
+        setImageURL(downloadURL);
+      }
+    } catch (err) {
+      toast.error("An error occurred during the image upload.");
+      console.error("Image upload error:", err);
+    }
   };
 
   const handleSubmitPost = async (e) => {
@@ -67,23 +80,21 @@ const UpdatePost = () => {
       return;
     }
 
-    try {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("category", category);
-      formData.append("content", content);
-      if (postImage) {
-        formData.append("postImage", postImage);
-      }
+    if (!imageURL) {
+      toast.info("Please wait for the image to finish uploading.");
+      console.log(imageURL)
+      return;
+    }
 
+    try {
       axios.defaults.withCredentials = true;
       const postResponse = await axios.put(
         `${backendPortURL}api/post/update/${id}`,
-        formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          title,
+          category,
+          postImage: imageURL,
+          content
         }
       );
 
@@ -94,7 +105,6 @@ const UpdatePost = () => {
       }
     } catch (error) {
       console.error("Error in updating the post:", error);
-      // Optional: display an error message to the user
     }
   };
 
@@ -170,6 +180,7 @@ const UpdatePost = () => {
           Update
         </button>
       </div>
+      <ToastContainer />
     </div>
   );
 };

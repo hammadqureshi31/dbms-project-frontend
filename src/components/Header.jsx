@@ -81,7 +81,7 @@ const Header = () => {
 
   return (
     <>
-      <div className="flex justify-between bg-white pb-4 md:px-12 w-full fixed z-40">
+      <div className="flex justify-between bg-white pb-4 md:px-12 w-full">
         <div
           className="flex items-center mt-3 ml-5 md:ml-6 cursor-pointer"
           onClick={() => navigate("/")}
@@ -119,7 +119,7 @@ const Header = () => {
           />
           {user && user.profilePicture && (
             <img
-              src={`${backendPort}${user.profilePicture}`}
+              src={`${user.profilePicture}`}
               onClick={() => setShowProfile((prev) => !prev)}
               alt="Profile"
               className="w-10 h-10 rounded-full mt-1.5 cursor-pointer"
