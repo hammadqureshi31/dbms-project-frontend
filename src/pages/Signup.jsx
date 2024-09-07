@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import axios from "axios";
 import { backendPortURL } from "../config";
 import useUploadImage from "../firebase/useUploadImage";
+import { Spinner } from 'flowbite-react';
 
 const SignupSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is Required"),
@@ -68,7 +69,7 @@ const Signup = () => {
           validationSchema={SignupSchema}
           onSubmit={handleSubmit}
         >
-          {({ setFieldValue }) => (
+          {({ setFieldValue, isSubmitting }) => (
             <Form>
               <Field
                 type="text"
@@ -125,7 +126,7 @@ const Signup = () => {
                 className="w-full px-4 py-3 mt-2 text-lg text-white bg-[#7C4EE4] rounded-lg hover:ring-2 hover:ring-[#7C4EE4]
                  hover:bg-blue-500 hover:font-semibold focus:outline-none hover:scale-100"
               >
-                Sign up
+                { isSubmitting ? <Spinner /> : 'Sign up'}
               </button>
             </Form>
           )}

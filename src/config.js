@@ -1,3 +1,3 @@
-export const backendPortURL = "https://dawn-2-dusk-blogs-backend.vercel.app/"
+export const backendPortURL = "http://localhost:3000/"
 
-export const backendPort = "https://dawn-2-dusk-blogs-backend.vercel.app"
+export const backendPort = "http://localhost:3000"

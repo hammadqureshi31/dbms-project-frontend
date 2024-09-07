@@ -15,6 +15,7 @@ const DashPosts = () => {
   const [userPosts, setUserPosts] = useState();
   const [showModal, setShowModal] = useState();
   const [postIdToDelete, setPostIdToDelete] = useState();
+  
   const dispatch = useDispatch();
 
   useEffect(() => {

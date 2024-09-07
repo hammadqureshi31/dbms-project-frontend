@@ -8,6 +8,7 @@ import { Modal, Button } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { ToastContainer, toast } from "react-toastify";
 import { uploadImage } from '../firebase/firebase';
+import { Spinner } from 'flowbite-react';
 
 const DashProfile = () => {
   const selector = useSelector((state) => state.currentUser.data);
@@ -20,6 +21,7 @@ const DashProfile = () => {
   const [userIdToDeleteAccount, setUserIdToDeleteAccount] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [imageURL, setImageURL] = useState(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -74,6 +76,7 @@ const DashProfile = () => {
     }
 
     try {
+      setUpdateLoading(true);
       axios.defaults.withCredentials = true;
       const updatedUser = await axios.post(
         `${backendPortURL}user/update/${selector._id}`,
@@ -86,6 +89,7 @@ const DashProfile = () => {
       );
 
       toast.success("Profile updated successfully.");
+      setUpdateLoading(false);
       console.log("Update", updatedUser.data);
     } catch (error) {
       toast.error("Error in updating profile.");
@@ -174,7 +178,7 @@ const DashProfile = () => {
             onClick={handleFormSubmit}
             className="w-full px-4 py-3 mt-2 text-lg text-white bg-[#7C4EE4] rounded-lg hover:ring-2 hover:ring-[#7C4EE4] hover:bg-blue-500 hover:font-semibold focus:outline-none"
           >
-            Update
+            { updateLoading ? <Spinner /> : 'Update'}
           </button>
 
           <ToastContainer />

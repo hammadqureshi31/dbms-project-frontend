@@ -6,7 +6,7 @@ import axios from "axios";
 import { backendPortURL } from "../config";
 import { FcGoogle } from "react-icons/fc";
 import { ToastContainer, toast } from 'react-toastify';
-
+import { Spinner } from 'flowbite-react';
 
 
 const LoginSchema = Yup.object().shape({
@@ -97,7 +97,7 @@ const Login = () => {
                   type="submit"
                   className="w-full px-4 py-3 mt-2 text-lg text-white bg-[#7C4EE4] rounded-lg hover:ring-2 hover:ring-[#7C4EE4] hover:bg-blue-500 hover:scale-100 hover:font-semibold focus:outline-none"
                 >
-                  Login
+                  { isSubmitting ? <Spinner /> : 'Login'}
                 </button>
               </Form>
             )}

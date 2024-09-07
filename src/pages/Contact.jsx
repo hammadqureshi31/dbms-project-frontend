@@ -7,69 +7,76 @@ import { GrPhone } from "react-icons/gr";
 import { backendPort } from "../config";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import { Spinner } from 'flowbite-react';
 
 const Contact = () => {
   const selector = useSelector((state) => state.currentUser.data);
   const [currentUser, setCurrentUser] = useState();
+  const [loading, setLoading] = useState(false); // Add loading state
 
-  useEffect(()=>{
-    if(selector){
+  useEffect(() => {
+    if (selector) {
       setCurrentUser(selector);
     }
-  }, [selector])
+  }, [selector]);
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      email: "",
-      subject: "",
+      username: "",
+      emailmsg: "",
+      msgSubject: "",
       message: "",
     },
     validationSchema: Yup.object({
-      name: Yup.string().max(20, "Must be 20 characters or less").required("Required"),
-      email: Yup.string().email("Invalid email address").required("Required"),
-      subject: Yup.string().max(10, "Must be 10 characters or less").required("Required"),
+      username: Yup.string().max(20, "Must be 20 characters or less").required("Required"),
+      emailmsg: Yup.string().email("Invalid email address").required("Required"),
+      msgSubject: Yup.string().max(10, "Must be 10 characters or less").required("Required"),
       message: Yup.string().min(20, "Must be at least 20 characters").required("Required"),
     }),
-    onSubmit: (values) => {
-      const { name, email, subject, message } = values;
+    onSubmit: async (values, { resetForm }) => {
+      setLoading(true); // Start loading when form is submitted
+      const { username, emailmsg, msgSubject, message } = values;
 
-      const contactAdmin = async () => {
-        try {
-          axios.defaults.withCredentials = true;
-          await axios.post(`${backendPort}/user/contact`, {
-            name,
-            email,
-            subject,
-            message,
-          });
-        } catch (error) {
-          console.log(error);
+      try {
+        axios.defaults.withCredentials = true;
+        const response = await axios.post(`${backendPort}/user/contact`, {
+          username,
+          emailmsg,
+          msgSubject,
+          message,
+        });
+        
+        if (response.status === 200) {
+          toast.success("Message sent successfully!");
+          resetForm(); // Reset form fields
+        } else {
+          toast.error("Failed to send message.");
         }
-      };
-
-      if (currentUser) {
-        contactAdmin();
+      } catch (error) {
+        toast.error("An error occurred. Please try again later.");
+        console.log(error);
+      } finally {
+        setLoading(false); // Stop loading after submission is complete
       }
     },
   });
 
   return (
     <div>
+      {/* Toast Container for notifications */}
+      <ToastContainer />
+
       <div className="mx-auto flex flex-col justify-center text-center gap-5 py-10">
         <div className="flex flex-col justify-center text-center gap-4 sm:gap-8">
           <h2 className="uppercase font-raleway font-semibold text-[#333333] opacity-80 text-sm">
             Contact us
           </h2>
-          <h1
-            className="font-raleway text-[#333333] font-bold text-2xl px-5 sm:text-3xl sm:mx-auto md:text-4xl lg:text-5xl"
-          >
+          <h1 className="font-raleway text-[#333333] font-bold text-2xl px-5 sm:text-3xl sm:mx-auto md:text-4xl lg:text-5xl">
             Get in Touch
           </h1>
-          <p
-            className="font-roboto text-[#999999] mx-auto w-72 text-xs flex justify-center text-center 
-            md:text-sm md:w-96"
-          >
+          <p className="font-roboto text-[#999999] mx-auto w-72 text-xs flex justify-center text-center md:text-sm md:w-96">
             Contact us to publish your content and show ads on our website and
             get a good reach.
           </p>
@@ -136,38 +143,38 @@ const Contact = () => {
               </label>
               <input
                 type="text"
-                id="name"
-                name="name"
+                id="username"
+                name="username"
                 className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4] ${
-                  formik.touched.name && formik.errors.name
+                  formik.touched.username && formik.errors.username
                     ? "border-red-500"
                     : "border-[#cccccc]"
                 }`}
-                {...formik.getFieldProps("name")}
+                {...formik.getFieldProps("username")}
               />
-              {formik.touched.name && formik.errors.name ? (
+              {formik.touched.username && formik.errors.username ? (
                 <div className="text-red-500 text-sm mt-1">
-                  {formik.errors.name}
+                  {formik.errors.username}
                 </div>
               ) : null}
             </div>
             <div>
               <label
-                htmlFor="email"
+                htmlFor="emailmsg"
                 className="block text-sm font-roboto text-[#999999] mb-2"
               >
                 Email
               </label>
               <input
                 type="email"
-                id="email"
-                name="email"
+                id="emailmsg"
+                name="emailmsg"
                 className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4] ${
                   formik.touched.email && formik.errors.email
                     ? "border-red-500"
                     : "border-[#cccccc]"
                 }`}
-                {...formik.getFieldProps("email")}
+                {...formik.getFieldProps("emailmsg")}
               />
               {formik.touched.email && formik.errors.email ? (
                 <div className="text-red-500 text-sm mt-1">
@@ -177,25 +184,25 @@ const Contact = () => {
             </div>
             <div>
               <label
-                htmlFor="subject"
+                htmlFor="msgSubject"
                 className="block text-sm font-roboto text-[#999999] mb-2"
               >
-                Subject
+                subject
               </label>
               <input
                 type="text"
-                id="subject"
-                name="subject"
+                id="msgSubject"
+                name="msgSubject"
                 className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7C4EE4] ${
-                  formik.touched.subject && formik.errors.subject
+                  formik.touched.msgSubject && formik.errors.msgSubject
                     ? "border-red-500"
                     : "border-[#cccccc]"
                 }`}
-                {...formik.getFieldProps("subject")}
+                {...formik.getFieldProps("msgSubject")}
               />
-              {formik.touched.subject && formik.errors.subject ? (
+              {formik.touched.msgSubject && formik.errors.msgSubject ? (
                 <div className="text-red-500 text-sm mt-1">
-                  {formik.errors.subject}
+                  {formik.errors.msgSubject}
                 </div>
               ) : null}
             </div>
@@ -216,18 +223,20 @@ const Contact = () => {
                     : "border-[#cccccc]"
                 }`}
                 {...formik.getFieldProps("message")}
-              ></textarea>
+              />
               {formik.touched.message && formik.errors.message ? (
                 <div className="text-red-500 text-sm mt-1">
                   {formik.errors.message}
                 </div>
               ) : null}
             </div>
+
             <button
               type="submit"
-              className="w-full py-3 bg-[#7C4EE4] text-white font-semibold rounded-md hover:ring-1 hover:ring-[#7C4EE4] hover:font-bold hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-[#7C4EE4]"
+              className="bg-[#7C4EE4] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#572ea3] transition-colors duration-300 flex justify-center items-center"
+              disabled={loading} // Disable the button when loading
             >
-              Send Message
+              {loading ? <Spinner size="sm" /> : "Send Message"}
             </button>
           </form>
         </div>

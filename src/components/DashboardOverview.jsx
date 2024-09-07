@@ -275,94 +275,98 @@ const DashboardOverview = () => {
       </div>
 
       {/* Recent Users Table */}
-      <div className="bg-white max-h-[65vh] rounded-lg shadow-lg p-4 overflow-y-scroll scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300">
+      <div className="bg-white rounded-lg shadow-lg p-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-lg font-raleway">Recent Users</h1>
           <Button outline gradientDuoTone="purpleToPink">
             <Link to={"/user/dashboard?tab=users"}>See all</Link>
           </Button>
         </div>
-        <Table hoverable className="font-roboto">
-          <Table.Head>
-            <Table.HeadCell>Date created</Table.HeadCell>
-            <Table.HeadCell>User image</Table.HeadCell>
-            <Table.HeadCell>Username</Table.HeadCell>
-            <Table.HeadCell>Email</Table.HeadCell>
-            <Table.HeadCell>Admin</Table.HeadCell>
-          </Table.Head>
-          {users &&
-            users.map((user) => (
-              <Table.Body key={user._id} className="divide-y">
-                <Table.Row className="bg-white">
-                  <Table.Cell>
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <img
-                      src={`${user.profilePicture}`}
-                      alt={user.username}
-                      className="w-10 h-10 object-cover rounded-full"
-                    />
-                  </Table.Cell>
-                  <Table.Cell>{user.username}</Table.Cell>
-                  <Table.Cell>{user.email}</Table.Cell>
-                  <Table.Cell>
-                    {user.isAdmin ? (
-                      <FaCheck className="text-green-500" />
-                    ) : (
-                      <FaTimes className="text-red-500" />
-                    )}
-                  </Table.Cell>
-                </Table.Row>
-              </Table.Body>
-            ))}
-        </Table>
+        <div className="max-h-[65vh] overflow-x-scroll overflow-y-scroll scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300">
+          <Table hoverable className="font-roboto">
+            <Table.Head>
+              <Table.HeadCell>Date created</Table.HeadCell>
+              <Table.HeadCell>User image</Table.HeadCell>
+              <Table.HeadCell>Username</Table.HeadCell>
+              <Table.HeadCell>Email</Table.HeadCell>
+              <Table.HeadCell>Admin</Table.HeadCell>
+            </Table.Head>
+            {users &&
+              users.map((user) => (
+                <Table.Body key={user._id} className="divide-y">
+                  <Table.Row className="bg-white">
+                    <Table.Cell>
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <img
+                        src={`${user.profilePicture}`}
+                        alt={user.username}
+                        className="w-10 h-10 object-cover rounded-full"
+                      />
+                    </Table.Cell>
+                    <Table.Cell>{user.username}</Table.Cell>
+                    <Table.Cell>{user.email}</Table.Cell>
+                    <Table.Cell>
+                      {user.isAdmin ? (
+                        <FaCheck className="text-green-500" />
+                      ) : (
+                        <FaTimes className="text-red-500" />
+                      )}
+                    </Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+              ))}
+          </Table>
+        </div>
       </div>
 
       {/* Recent Comments Table */}
-      <div className="bg-white max-h-[65vh] rounded-lg shadow-lg p-4 overflow-y-scroll scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300">
+      <div className="bg-white rounded-lg shadow-lg p-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-lg font-raleway">Recent Comments</h1>
           <Button outline gradientDuoTone="purpleToPink">
             <Link to={"/user/dashboard?tab=comments"}>See all</Link>
           </Button>
         </div>
-        <Table hoverable className="font-roboto">
-          <Table.Head>
-            <Table.HeadCell>Date updated</Table.HeadCell>
-            <Table.HeadCell>Comment content</Table.HeadCell>
-            <Table.HeadCell>Likes</Table.HeadCell>
-            <Table.HeadCell>Post ID</Table.HeadCell>
-            <Table.HeadCell>User ID</Table.HeadCell>
-          </Table.Head>
-          {comments ? (
-            comments.map((comment) => (
-              <Table.Body key={comment._id} className="divide-y">
-                <Table.Row className="bg-white">
-                  <Table.Cell className="text-xs md:text-sm">
-                    {new Date(comment.updatedAt).toLocaleDateString()}
-                  </Table.Cell>
-                  <Table.Cell className="text-xs md:text-sm">
-                    {comment.content}
-                  </Table.Cell>
-                  <Table.Cell className="text-xs md:text-sm">
-                    {comment.likes?.length}
-                  </Table.Cell>
-                  <Table.Cell className="text-xs md:text-sm">
-                    {comment.postId}
-                  </Table.Cell>
-                  <Table.Cell className="text-xs md:text-sm">
-                    {comment.userId}
-                  </Table.Cell>
-                </Table.Row>
-              </Table.Body>
-            ))
-          ) : (
-            <p className="text-center text-gray-500 mt-4">
-              You have no comments yet!
-            </p>
-          )}
-        </Table>
+        <div className="max-h-[65vh] overflow-x-scroll overflow-y-scroll scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300">
+          <Table hoverable className="font-roboto">
+            <Table.Head>
+              <Table.HeadCell>Date updated</Table.HeadCell>
+              <Table.HeadCell>Comment content</Table.HeadCell>
+              <Table.HeadCell>Likes</Table.HeadCell>
+              <Table.HeadCell>Post ID</Table.HeadCell>
+              <Table.HeadCell>User ID</Table.HeadCell>
+            </Table.Head>
+            {comments ? (
+              comments.map((comment) => (
+                <Table.Body key={comment._id} className="divide-y">
+                  <Table.Row className="bg-white">
+                    <Table.Cell className="text-xs md:text-sm">
+                      {new Date(comment.updatedAt).toLocaleDateString()}
+                    </Table.Cell>
+                    <Table.Cell className="text-xs md:text-sm">
+                      {comment.content}
+                    </Table.Cell>
+                    <Table.Cell className="text-xs md:text-sm">
+                      {comment.likes?.length}
+                    </Table.Cell>
+                    <Table.Cell className="text-xs md:text-sm">
+                      {comment.postId}
+                    </Table.Cell>
+                    <Table.Cell className="text-xs md:text-sm">
+                      {comment.userId}
+                    </Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+              ))
+            ) : (
+              <p className="text-center text-gray-500 mt-4">
+                You have no comments yet!
+              </p>
+            )}
+          </Table>
+        </div>
       </div>
 
       {/* Recent Posts Table */}
@@ -373,42 +377,44 @@ const DashboardOverview = () => {
             <Link to={"/user/dashboard?tab=posts"}>See all</Link>
           </Button>
         </div>
-        <Table hoverable className="font-roboto ">
-          <Table.Head>
-            <Table.HeadCell>Date updated</Table.HeadCell>
-            <Table.HeadCell>Post image</Table.HeadCell>
-            <Table.HeadCell>Post title</Table.HeadCell>
-            <Table.HeadCell>Category</Table.HeadCell>
-          </Table.Head>
-          {posts &&
-            posts.map((post) => (
-              <Table.Body key={post._id} className="divide-y">
-                <Table.Row className="bg-white">
-                  <Table.Cell className="text-xs">
-                    {new Date(post.updatedAt).toLocaleDateString()}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Link to={`/blogs/${post._id}`}>
-                      <img
-                        src={`${post.postImage}`}
-                        alt={post.title}
-                        className="w-24 h-12 object-cover bg-gray-500"
-                      />
-                    </Link>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Link
-                      className="font-raleway text-[#333333]"
-                      to={`/blogs/${post._id}`}
-                    >
-                      {post.title}
-                    </Link>
-                  </Table.Cell>
-                  <Table.Cell>{post.category}</Table.Cell>
-                </Table.Row>
-              </Table.Body>
-            ))}
-        </Table>
+        <div className="max-h-[65vh] overflow-x-scroll overflow-y-scroll scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300">
+          <Table hoverable className="font-roboto ">
+            <Table.Head>
+              <Table.HeadCell>Date updated</Table.HeadCell>
+              <Table.HeadCell>Post image</Table.HeadCell>
+              <Table.HeadCell>Post title</Table.HeadCell>
+              <Table.HeadCell>Category</Table.HeadCell>
+            </Table.Head>
+            {posts &&
+              posts.map((post) => (
+                <Table.Body key={post._id} className="divide-y">
+                  <Table.Row className="bg-white">
+                    <Table.Cell className="text-xs">
+                      {new Date(post.updatedAt).toLocaleDateString()}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Link to={`/blogs/${post._id}`}>
+                        <img
+                          src={`${post.postImage}`}
+                          alt={post.title}
+                          className="w-24 h-12 object-cover bg-gray-500"
+                        />
+                      </Link>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Link
+                        className="font-raleway text-[#333333]"
+                        to={`/blogs/${post._id}`}
+                      >
+                        {post.title}
+                      </Link>
+                    </Table.Cell>
+                    <Table.Cell>{post.category}</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+              ))}
+          </Table>
+        </div>
       </div>
     </div>
   );
