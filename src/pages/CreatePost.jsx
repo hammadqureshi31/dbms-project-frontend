@@ -78,7 +78,6 @@ const CreatePost = () => {
       );
 
       console.log("post: ", postResponse);
-      dispatch(fetchAllPosts());
       if(postResponse.data){
         navigate(`/blogs/${postResponse.data.post._id}`);
       }
@@ -115,6 +114,7 @@ const CreatePost = () => {
               <option value="development">Development</option>
               <option value="reactjs">React.js</option>
               <option value="nextjs">Next.js</option>
+              <option value="nodejs">Node.js</option>
             </select>
           </div>
 

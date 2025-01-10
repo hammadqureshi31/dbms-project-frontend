@@ -6,11 +6,11 @@ import LandingComp from '../components/LandingComp'
 import RecentPosts from '../components/RecentPosts'
 import PopularPosts from '../components/PopularPosts'
 
-const Home = () => {
+const Home = () => { 
   const dispatch = useDispatch();
-  useEffect(() => {
+  useEffect(() => { 
       dispatch(fetchUserDetails())
-      dispatch(fetchAllPosts())
+      dispatch(fetchAllPosts({dashBoard:0}))
   }, [])
 
 

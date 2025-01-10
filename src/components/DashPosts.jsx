@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 import { fetchAllPosts } from '../redux/slices/postSlice'
 
 const DashPosts = () => {
-  const selector = useSelector((state) => state.blogPosts.data);
+  const selector = useSelector((state) => state.blogPosts.data.posts);
   const currentUser = useSelector((state) => state.currentUser.data);
   const [userPosts, setUserPosts] = useState();
   const [showModal, setShowModal] = useState();
@@ -31,7 +31,7 @@ const DashPosts = () => {
 
 
   return (
-    <div className="table-auto max-h-[85vh] overflow-y-scroll overflow-x-scroll md:mx-auto p-3 scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300">
+    <div className="table-auto max-h-[90vh] overflow-y-scroll overflow-x-scroll md:mx-auto p-3 scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300">
       {currentUser.isAdmin && userPosts?.length > 0 ? (
         <>
           <Table hoverable className="shadow-md">

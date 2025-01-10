@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router";
-import { backendPort } from "../config";
+import { backendPort, backendPortURL } from "../config";
 import axios from "axios";
 import Comments from "../components/Comments";
 
 const ViewPost = () => {
-  const selector = useSelector((state) => state.blogPosts.data);
+  const selector = useSelector((state) => state.blogPosts.data.posts);
   const user = useSelector((state) => state.currentUser.data);
   const { id } = useParams();
   const [postData, setPostData] = useState(null);
@@ -15,18 +15,31 @@ const ViewPost = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchPost = async()=> {
     if (selector && id) {
-      const validPost = selector.find((post) => post._id === id);
-      if (validPost) {
-        setPostData(validPost);
+      try {
+        axios.defaults.withCredentials = true;
+        const postResp = await axios.get(`${backendPortURL}api/post/${id}`);
+        if (postResp) setPostData(postResp.data);
         setLoading(false);
-      } else {
-        console.log("No post found with the given ID.");
+        console.log(postResp);
+      } catch (error) {
+        console.log("Error in fetching Post ID or blog data.");
       }
+      // const validPost = selector.find((post) => post._id === id);
+      // if (validPost) {
+      //   setPostData(validPost);
+      //   
+      // } else {
+      //   console.log("No post found with the given ID.");
+      // }
     } else {
       console.log("Post ID or blog data is missing.");
     }
-  }, [selector, id]);
+  }
+
+  fetchPost();
+  }, [id]);
 
   const handleWriteNewComment = async () => {
     try {
@@ -127,7 +140,7 @@ const ViewPost = () => {
             ></textarea>
           )}
 
-          <Comments postId={postData._id} commentRes={newComment}/>
+          <Comments postId={postData._id} commentRes={newComment} />
         </div>
       </div>
     </div>

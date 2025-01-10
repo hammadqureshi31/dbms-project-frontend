@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import Posts from "../components/Posts";
 import { useSelector } from "react-redux";
+import PostPagination from "../components/PostPagination";
 
 const Blogs = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState();
   const [sort, setSort] = useState(false);
-  const [categry, setCategry] = useState()
+  const [categry, setCategry] = useState();
   const [postData, setPostData] = useState(null);
   const [filteredPostData, setFilteredPostData] = useState(null);
-  const [sortCount, setSortCount] = useState(null)
-  const selector = useSelector((state) => state.blogPosts.data);
+  const [sortCount, setSortCount] = useState(null);
+  const selector = useSelector((state) => state.blogPosts.data.posts);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (selector && selector.length > 0) {
@@ -21,50 +23,45 @@ const Blogs = () => {
 
   const toggleFilters = () => {
     setShowFilters(!showFilters);
-
   };
 
   const handleApplyFilter = (e) => {
     e.preventDefault();
-  
+
     let filteredData = [...postData];
-    
+
     // Search Term Filter
-    if (searchTerm && searchTerm.trim() !== '') {
+    if (searchTerm && searchTerm.trim() !== "") {
       const titleMatch = filteredData.filter((blog) =>
         blog.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
       const contentMatch = filteredData.filter((blog) =>
         blog.content.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  
+      );
+
       filteredData = [...new Set([...titleMatch, ...contentMatch])];
     }
-  
+
     // Category Filter
     if (categry && categry !== "uncategorized") {
       filteredData = filteredData.filter((blog) => blog.category === categry);
     }
-    
+
     // Sorting
-    if (sort === "desc" && sortCount === true || sortCount == null) {
-      filteredData.reverse()
-      setSortCount(false)
-    } else if (sort === "asc" && sortCount === false || sortCount == null) {
-      filteredData.reverse()
-      setSortCount(true)
+    if ((sort === "desc" && sortCount === true) || sortCount == null) {
+      filteredData.reverse();
+      setSortCount(false);
+    } else if ((sort === "asc" && sortCount === false) || sortCount == null) {
+      filteredData.reverse();
+      setSortCount(true);
     }
-    
+
     // Update the filtered data
     setFilteredPostData(filteredData);
     // setCategry("uncategorized");
     // setSearchTerm('');
     // setSort('select');
   };
-  
-  
-
-  
 
   return (
     <>
@@ -115,7 +112,7 @@ const Blogs = () => {
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e)=>setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Type to search..."
                   className="w-full px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-300"
                 />
@@ -131,9 +128,11 @@ const Blogs = () => {
                 Sort By:
               </label>
               <div className="relative">
-                <select value={sort}
-                onChange={(e)=>setSort(e.target.value)}
-                className="w-full px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-300">
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value)}
+                  className="w-full px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-300"
+                >
                   <option value="">Select</option>
                   <option value="asc">Oldest</option>
                   <option value="desc">Latest</option>
@@ -150,9 +149,11 @@ const Blogs = () => {
                 Category:
               </label>
               <div className="relative">
-                <select value={categry}
-                onChange={(e)=>setCategry(e.target.value)}
-                 className="w-full px-4 py-2  rounded-full focus:outline-none focus:ring-2 focus:ring-purple-300">
+                <select
+                  value={categry}
+                  onChange={(e) => setCategry(e.target.value)}
+                  className="w-full px-4 py-2  rounded-full focus:outline-none focus:ring-2 focus:ring-purple-300"
+                >
                   <option value="uncategorized">Select Category</option>
                   <option value="development">Development</option>
                   <option value="reactjs">React.js</option>
@@ -166,19 +167,26 @@ const Blogs = () => {
 
             {/* Apply Filter Button */}
             <div className="flex justify-center mt-6 md:mt-0">
-              <button 
-              onClick={handleApplyFilter}
-              className="px-6 py-3 text-nowrap rounded-full sm:text-sm bg-white text-[#7C4EE4] font-bold hover:bg-[#7C4EE4] hover:text-white hover:shadow-lg transition duration-300">
+              <button
+                onClick={handleApplyFilter}
+                className="px-6 py-3 text-nowrap rounded-full sm:text-sm bg-white text-[#7C4EE4] font-bold hover:bg-[#7C4EE4] hover:text-white hover:shadow-lg transition duration-300"
+              >
                 Apply Filters
               </button>
             </div>
           </div>
         </div>
 
-
         {/* // All posts */}
         <div className="w-full">
-          <Posts postData={filteredPostData}/>
+          <Posts postData={filteredPostData} />
+        </div>
+
+        <div className="mx-auto mt-10"> 
+          <PostPagination
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
         </div>
       </div>
     </>

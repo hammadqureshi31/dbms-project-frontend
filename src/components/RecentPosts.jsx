@@ -5,7 +5,7 @@ import Button from "./Button";
 
 const RecentPosts = () => {
   const [posts, setPosts] = useState([]);
-  const selector = useSelector((state) => state.blogPosts.data);
+  const selector = useSelector((state) => state.blogPosts.data.posts);
 
   useEffect(() => {
     if (selector && selector.length > 0) {

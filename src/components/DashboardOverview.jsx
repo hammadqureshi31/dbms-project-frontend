@@ -1,283 +1,439 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import {
-  HiAnnotation,
-  HiArrowNarrowUp,
-  HiDocumentText,
-  HiOutlineUserGroup,
-} from "react-icons/hi";
 import { Button, Table } from "flowbite-react";
 import { Link } from "react-router-dom";
-import { backendPort } from "../config";
 import { FaCheck, FaTimes } from "react-icons/fa";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from "recharts";
+import { GoGraph } from "react-icons/go";
+
+const COLORS = ["#7C4EE4", "#00C49F", "#FFBB28", "#FF8042"];
 
 const DashboardOverview = () => {
   const allUsers = useSelector((state) => state.allUsers.data?.users);
-  const allPosts = useSelector((state) => state.blogPosts.data);
+  const allPosts = useSelector((state) => state.blogPosts.data?.posts);
+  const allCategories = useSelector(
+    (state) => state.blogPosts.data?.categories
+  );
   const allComments = useSelector((state) => state.postComments.data?.comments);
+  const user = useSelector((state) => state.currentUser?.data);
+  const logs = useSelector((state) => state.logs.data);
+  console.log(logs);
+  const [categoryData, setCategoryData] = useState([]);
+  const [userData, setUserData] = useState([]);
+  const [postData, setPostData] = useState([]);
+  const [comments, setComments] = useState();
   const [users, setUsers] = useState();
   const [posts, setPosts] = useState();
-  const [comments, setComments] = useState();
+  const [commentData, setCommentData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [categoryViews, setCategoryViews] = useState([]);
 
   useEffect(() => {
-    if (allUsers && allPosts && allComments) {
+    if (allUsers && allPosts && allComments && allCategories) {
+      setCategoryData(generateCategoryData(allCategories));
+      setUserData(groupByDate(allUsers, "createdAt"));
+      setPostData(groupByDate(allPosts, "createdAt"));
+      setCommentData(groupByDate(allComments, "createdAt"));
       setUsers(allUsers);
       setPosts(allPosts);
       setComments(allComments);
       setLoading(false);
     }
-  }, [allUsers, allComments, allPosts]);
+  }, [allUsers, allPosts, allComments, allCategories]);
+
+  const generateCategoryData = (categories) => {
+    if (!categories || !Array.isArray(categories)) {
+      console.error("Invalid categories array:", categories);
+      return [];
+    }
+
+    if (!allPosts || !Array.isArray(allPosts)) {
+      console.error("Invalid allPosts array:", allPosts);
+      return [];
+    }
+
+    const categoryViews = categories.map((category) => {
+      const postStats = allPosts.filter((data) => data.category === category);
+      console.log(postStats);
+      const views = postStats.reduce((total, post) => {
+        if (typeof post.clicks !== "number") {
+          console.warn(`Invalid clicks value for post:`, post);
+          return total;
+        }
+        console.log(post.clicks);
+        return total + post.clicks;
+      }, 0);
+
+      return { name: category, value: views };
+    });
+
+    const sortedCategoryViews = categoryViews.sort((a, b) => b.value - a.value);
+
+    console.log("Generated Category Data:", sortedCategoryViews);
+
+    return sortedCategoryViews;
+  };
+
+  const groupByDate = (data, dateField) => {
+    const groupedData = data.reduce((acc, item) => {
+      const date = new Date(item[dateField]).toISOString().split("T")[0];
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(groupedData).map(([date, count]) => ({
+      date,
+      count,
+    }));
+  };
+
+  const formatDate = (date) => {
+    const options = {
+      weekday: "long",
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    };
+    return date.toLocaleDateString("en-US", options);
+  };
+
+  const formatLogDate = (date) => {
+    return new Date(date).toLocaleString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
+
+  const today = new Date();
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4 flex flex-col gap-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Skeleton for Total Users Card */}
-          <div className="flex flex-col p-4 bg-gradient-to-r from-teal-400 to-teal-600 rounded-lg shadow-lg animate-pulse">
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="h-4 bg-gray-300 rounded w-2/3 mb-2"></div>
-                <div className="h-8 bg-gray-300 rounded w-1/2"></div>
+      <div className="hidden md:flex flex-col justify-between items-center bg-white shadow-md rounded-lg">
+        {/* Header Section */}
+        <div className=" hidden w-full md:flex flex-col md:flex-row justify-between items-center bg-white shadow-md p-4 rounded-lg">
+          <div className="mb-4 md:mb-0 md:flex justify-start text-center gap-3">
+            <h1 className="text-2xl font-semibold font-raleway border-r-2 border-gray-200 pr-3">
+              Dashboard
+            </h1>
+            <h2 className="text-2xl text-[#7C4EE4] uppercase font-semibold font-lobster tracking-wider">
+              {user ? user.username : "Guest"}
+            </h2>
+            <h4 className="text-lg font-roboto pt-1 text-[#00C49F]">
+              {user && user?.email}
+            </h4>
+          </div>
+          {/* Date Section */}
+          <div className="md:flex justify-start text-center gap-5 bg-gray-100 rounded-md py-2 px-3">
+            <h1 className="text-xl font-light">Today:</h1>
+            <h2 className="text-lg text-[#7C4EE4] font-semibold">
+              {formatDate(today)}
+            </h2>
+          </div>
+        </div>
+
+        {/* Skeleton for Tables */}
+        {["Recent Users", "Recent Comments", "Recent Posts"].map(
+          (section, sectionIndex) => (
+            <div
+              key={sectionIndex}
+              className="bg-white mt-5 max-h-[65vh] w-full rounded-lg shadow-lg p-4 overflow-y-scroll scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300 animate-pulse"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <div className="h-6 bg-gray-300 rounded w-1/3"></div>
+                <div className="h-8 w-24 bg-gray-300 rounded"></div>
               </div>
-              <div className="h-12 w-12 bg-gray-300 rounded-full"></div>
+              <Table hoverable className="font-roboto">
+                <Table.Head>
+                  {[...Array(5)].map((_, index) => (
+                    <Table.HeadCell key={index}>
+                      <div className="h-4 bg-gray-300 rounded w-20"></div>
+                    </Table.HeadCell>
+                  ))}
+                </Table.Head>
+                <Table.Body>
+                  {[...Array(5)].map((_, rowIndex) => (
+                    <Table.Row
+                      key={rowIndex}
+                      className="bg-white animate-pulse"
+                    >
+                      {[...Array(sectionIndex === 2 ? 4 : 5)].map(
+                        (_, cellIndex) => (
+                          <Table.Cell key={cellIndex}>
+                            {sectionIndex === 1 && cellIndex === 1 ? (
+                              <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+                            ) : sectionIndex === 2 && cellIndex === 1 ? (
+                              <div className="w-24 h-12 bg-gray-300 rounded"></div>
+                            ) : (
+                              <div className="h-4 bg-gray-300 rounded w-20"></div>
+                            )}
+                          </Table.Cell>
+                        )
+                      )}
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
             </div>
-            <div className="flex gap-2 text-white text-sm mt-2">
-              <div className="h-4 bg-gray-300 rounded w-1/4"></div>
-            </div>
-          </div>
-
-          {/* Skeleton for Total Comments Card */}
-          <div className="flex flex-col p-4 bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-lg shadow-lg animate-pulse">
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="h-4 bg-gray-300 rounded w-2/3 mb-2"></div>
-                <div className="h-8 bg-gray-300 rounded w-1/2"></div>
-              </div>
-              <div className="h-12 w-12 bg-gray-300 rounded-full"></div>
-            </div>
-            <div className="flex gap-2 text-white text-sm mt-2">
-              <div className="h-4 bg-gray-300 rounded w-1/4"></div>
-            </div>
-          </div>
-
-          {/* Skeleton for Total Posts Card */}
-          <div className="flex flex-col p-4 bg-gradient-to-r from-lime-400 to-lime-600 rounded-lg shadow-lg animate-pulse">
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="h-4 bg-gray-300 rounded w-2/3 mb-2"></div>
-                <div className="h-8 bg-gray-300 rounded w-1/2"></div>
-              </div>
-              <div className="h-12 w-12 bg-gray-300 rounded-full"></div>
-            </div>
-            <div className="flex gap-2 text-white text-sm mt-2">
-              <div className="h-4 bg-gray-300 rounded w-1/4"></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Skeleton for Recent Users Table */}
-        <div className="bg-white max-h-[65vh] rounded-lg shadow-lg p-4 overflow-y-scroll scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300 animate-pulse">
-          <div className="flex justify-between items-center mb-4">
-            <div className="h-6 bg-gray-300 rounded w-1/3"></div>
-            <div className="h-8 w-24 bg-gray-300 rounded"></div>
-          </div>
-          <Table hoverable className="font-roboto">
-            <Table.Head>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-            </Table.Head>
-            <Table.Body>
-              {[...Array(5)].map((_, index) => (
-                <Table.Row key={index} className="bg-white animate-pulse">
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        </div>
-
-        {/* Skeleton for Recent Comments Table */}
-        <div className="bg-white max-h-[65vh] rounded-lg shadow-lg p-4 overflow-y-scroll scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300 animate-pulse">
-          <div className="flex justify-between items-center mb-4">
-            <div className="h-6 bg-gray-300 rounded w-1/3"></div>
-            <div className="h-8 w-24 bg-gray-300 rounded"></div>
-          </div>
-          <Table hoverable className="font-roboto">
-            <Table.Head>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-            </Table.Head>
-            <Table.Body>
-              {[...Array(5)].map((_, index) => (
-                <Table.Row key={index} className="bg-white animate-pulse">
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        </div>
-
-        {/* Skeleton for Recent Posts Table */}
-        <div className="bg-white max-h-[65vh] rounded-lg shadow-lg p-4 overflow-y-scroll scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300 animate-pulse">
-          <div className="flex justify-between items-center mb-4">
-            <div className="h-6 bg-gray-300 rounded w-1/3"></div>
-            <div className="h-8 w-24 bg-gray-300 rounded"></div>
-          </div>
-          <Table hoverable className="font-roboto">
-            <Table.Head>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-              <Table.HeadCell>
-                <div className="h-4 bg-gray-300 rounded w-20"></div>
-              </Table.HeadCell>
-            </Table.Head>
-            <Table.Body>
-              {[...Array(5)].map((_, index) => (
-                <Table.Row key={index} className="bg-white animate-pulse">
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="w-24 h-12 bg-gray-300 rounded"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        </div>
+          )
+        )}
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 flex flex-col gap-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Total Users Card */}
-        <div className="flex flex-col p-4 bg-gradient-to-r from-teal-400 to-teal-600 rounded-lg shadow-lg">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-white text-md uppercase font-raleway">
-                Total Users
-              </h3>
-              <p className="text-white text-3xl font-roboto">{users?.length}</p>
-            </div>
-            <HiOutlineUserGroup className="text-white text-5xl" />
+    <div className="container flex flex-col gap-5 mx-auto overflow-hidden">
+      {/* Header Section */}
+      <div className=" hidden md:flex flex-col md:flex-row justify-between items-center bg-white shadow-md p-4 rounded-lg">
+        <div className="mb-4 md:mb-0 md:flex justify-start text-center gap-3">
+          <h1 className="text-2xl font-semibold font-raleway border-r-2 border-gray-200 pr-3">
+            Dashboard
+          </h1>
+          <h2 className="text-2xl text-[#7C4EE4] uppercase font-semibold font-lobster tracking-wider">
+            {user ? user.username : "Guest"}
+          </h2>
+          <h4 className="text-lg font-roboto pt-1 text-[#00C49F]">
+            {user && user?.email}
+          </h4>
+        </div>
+        {/* Date Section */}
+        <div className="md:flex justify-start font-roboto text-center gap-5 bg-gray-100 rounded-md py-2 px-3">
+          <h1 className="text-xl">Today:</h1>
+          <h2 className="text-lg text-[#7C4EE4] font-semibold">
+            {formatDate(today)}
+          </h2>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-t-lg rounded-b-2xl">
+        <div className="flex w-full justify-start text-center gap-2 p-6 ">
+          <div className="text-3xl pt-1 text-[#00C49F]">
+            <GoGraph />
           </div>
-          <div className="flex gap-2 text-white text-sm mt-2">
-            <HiArrowNarrowUp className="text-white mt-0.5" />
-            <span>{users?.length} Last month</span>
-          </div>
+          <h1 className="text-3xl pt-1 rounded-t-md  font-raleway text-[#00C49F]">
+            Platform Stats
+          </h1>
         </div>
 
-        {/* Total Comments Card */}
-        <div className="flex flex-col p-4 bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-lg shadow-lg">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-white text-md uppercase font-raleway">
-                Total Comments
-              </h3>
-              <p className="text-white text-3xl font-roboto">
-                {comments?.length || 0}
-              </p>
-            </div>
-            <HiAnnotation className="text-white text-5xl" />
-          </div>
-          <div className="flex gap-2 text-white text-sm mt-2">
-            <HiArrowNarrowUp className="text-white mt-0.5" />
-            <span>{comments?.length} Last month</span>
-          </div>
-        </div>
+        {/* Section: Pie Chart and Bar Chart */}
+        <div className="ring-1 ring-gray-200 w-full flex flex-col md:flex-row items-start gap-8 px-4 py-8 bg-white shadow-md rounded-3xl">
+          {/* Pie Chart */}
+          <div className="mx-auto flex-1 text-center w-full">
+            <h3 className="text-2xl font-bold mb-6 font-raleway bg-clip-text text-transparent bg-gradient-to-t from-[#7C4EE4] to-blue-400">
+              Most Trending Categories
+            </h3>
 
-        {/* Total Posts Card */}
-        <div className="flex flex-col p-4 bg-gradient-to-r from-lime-400 to-lime-600 rounded-lg shadow-lg">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-white text-md uppercase font-raleway">
-                Total Posts
-              </h3>
-              <p className="text-white text-3xl font-roboto">{posts?.length}</p>
+            {/* Pie Chart */}
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={120}
+                  fill="#8884d8"
+                  label={(entry) => `${entry.name}: ${entry.value}`}
+                >
+                  {categoryData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+
+            {/* Legend Section */}
+            <div className="flex justify-center flex-wrap gap-4 mb-4 font-roboto">
+              {categoryData.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  ></div>
+                  <span className="text-sm ">{item.name}</span>
+                </div>
+              ))}
             </div>
-            <HiDocumentText className="text-white text-5xl" />
           </div>
-          <div className="flex gap-2 text-white text-sm mt-2">
-            <HiArrowNarrowUp className="text-white mt-0.5" />
-            <span>{posts?.length} Last month</span>
+
+          {/* Bar Chart */}
+          <div className="mx-auto flex-1 text-center w-full">
+            <h3 className="text-2xl font-bold mb-12 font-raleway bg-clip-text text-transparent bg-gradient-to-t from-[#7C4EE4] to-blue-400">
+              Posts Over Time
+            </h3>
+
+            {/* Bar Chart */}
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={postData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#D1D5DB" />
+                <XAxis dataKey="date" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#F9FAFB",
+                    border: "1px solid #7C4EE4",
+                  }}
+                />
+                <Legend
+                  wrapperStyle={{ color: "#374151" }}
+                  className="font-roboto"
+                />
+                <Bar dataKey="count" fill="#7C4EE4" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
 
+      {/* Section: Line and Area Charts */}
+      <div className="mx-auto w-full flex flex-col md:flex-row items-start gap-8 p-6 bg-white shadow-md rounded-lg">
+        {/* Users Area Chart */}
+        <div className="mx-auto flex-1 text-center w-full">
+          <h3 className="text-2xl font-bold mb-6 font-raleway bg-clip-text text-transparent bg-gradient-to-t from-[#7C4EE4] to-blue-400">
+            Users Growth
+          </h3>
+
+          {/* Users Area Chart */}
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={userData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#D1D5DB" />
+              <XAxis dataKey="date" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#F9FAFB",
+                  border: "1px solid #7C4EE4",
+                }}
+              />
+              <Legend wrapperStyle={{ color: "#374151" }} />
+              <Area
+                type="monotone"
+                dataKey="count"
+                name="Users"
+                stroke="#7C4EE4"
+                fillOpacity={0.4} // Adjusts fill opacity
+                fill="#7C4EE4"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Comments Line Chart */}
+        <div className="mx-auto flex-1 text-center w-full">
+          <h3 className="text-2xl font-bold mb-6 font-raleway bg-clip-text text-transparent bg-gradient-to-t from-[#7C4EE4] to-blue-400">
+            Comments Over Time
+          </h3>
+
+          {/* Comments Line Chart */}
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={commentData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#D1D5DB" />
+              <XAxis dataKey="date" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#F9FAFB",
+                  border: "1px solid #7C4EE4",
+                }}
+              />
+              <Legend wrapperStyle={{ color: "#374151" }} />
+              <Line
+                type="monotone"
+                dataKey="count"
+                name="Comments"
+                stroke="#7C4EE4"
+                strokeWidth={2}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <section className="bg-white shadow-md rounded-lg p-6 w-full mx-auto">
+        {/* Header */}
+        <header className="mb-6">
+          <h1 className="text-xl sm:text-2xl  font-bold mb-6 font-raleway bg-clip-text text-transparent bg-gradient-to-t from-[#7C4EE4] to-blue-400">
+            Platform Activity
+          </h1>
+        </header>
+
+        {/* Activity List */}
+        <div>
+          {logs && logs.length > 0 ? (
+            <ul className="space-y-5">
+              {logs
+                .slice()
+                .reverse()
+                .slice(0, 6)
+                .map((log, index) => (
+                  <div className="max-w-md">
+                    <li key={index} className="flex justify-start text-start">
+                      {/* Date */}
+                      <p className="text-sm font-semibold max-w-18 font-sans text-left">
+                        {formatLogDate(log.date)}
+                      </p>
+
+                      {/* Circle Indicator */}
+                      <span
+                        className={`h-4 w-4 mx-auto sm:mx-5 border-4 rounded-full ${
+                          log.details.toLowerCase().includes("logged in")
+                            ? "border-blue-500 bg-white"
+                            : log.details.toLowerCase().includes("comment")
+                            ? "border-orange-500 bg-white"
+                            : "border-green-500 bg-white"
+                        }`}
+                      ></span>
+
+                      <p className="hidden sm:block font-roboto font-medium ">
+                        Deatails:{" "}
+                      </p>
+                      {/* Log Details */}
+                      <p className="text-sm font-raleway pl-2 w-36 sm:w-auto text-ellipsis text-wrap">
+                        {log.details}
+                      </p>
+                    </li>
+                    {index !== logs.slice(0, 6).length - 1 && (
+                      <div className="w-full h-auto justify-center text-center pl-[98px] sm: ">
+                        <div className=" w-1 h-10 rounded-md bg-gray-200 text-gray-200"></div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 text-sm">No Activity yet...</p>
+          )}
+        </div>
+      </section>
+
       {/* Recent Users Table */}
       <div className="bg-white rounded-lg shadow-lg p-4">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-lg font-raleway">Recent Users</h1>
+          <h1 className="text-xl sm:text-2xl  font-bold mb-6 font-raleway bg-clip-text text-transparent bg-gradient-to-t from-[#7C4EE4] to-blue-400">
+            Recent Users
+          </h1>
           <Button outline gradientDuoTone="purpleToPink">
             <Link to={"/user/dashboard?tab=users"}>See all</Link>
           </Button>
@@ -324,7 +480,9 @@ const DashboardOverview = () => {
       {/* Recent Comments Table */}
       <div className="bg-white rounded-lg shadow-lg p-4">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-lg font-raleway">Recent Comments</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-6 font-raleway bg-clip-text text-transparent bg-gradient-to-t from-[#7C4EE4] to-blue-400">
+            Recent Comments
+          </h1>
           <Button outline gradientDuoTone="purpleToPink">
             <Link to={"/user/dashboard?tab=comments"}>See all</Link>
           </Button>
@@ -372,7 +530,9 @@ const DashboardOverview = () => {
       {/* Recent Posts Table */}
       <div className="bg-white max-h-[65vh] rounded-lg shadow-lg p-4 overflow-y-scroll scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-lg font-raleway">Recent Posts</h1>
+          <h1 className="text-xl sm:text-2xl  font-bold mb-6 font-raleway bg-clip-text text-transparent bg-gradient-to-t from-[#7C4EE4] to-blue-400">
+            Recent Posts
+          </h1>
           <Button outline gradientDuoTone="purpleToPink">
             <Link to={"/user/dashboard?tab=posts"}>See all</Link>
           </Button>

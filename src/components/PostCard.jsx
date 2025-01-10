@@ -28,9 +28,23 @@ const PostCard = ({ data }) => {
     setExcerpt(truncatedText);
   };
 
+  const HandleNavigate = (postId, postCategory) => {
+    const postViews = parseInt(localStorage.getItem(postCategory), 10);
+  
+    if (isNaN(postViews)) {
+      localStorage.setItem(postCategory, 1);
+    } else {
+      localStorage.setItem(postCategory, postViews + 1);
+    }
+  
+    navigate(`/blogs/${postId}`);
+  };
+  
+
+
   return (
     <div
-      onClick={() => navigate(`/blogs/${postData?._id}`)}
+      onClick={()=>HandleNavigate(postData?._id, postData?.category)}
       className="min-w-[300px] max-w-[340px] mx-auto p-5 mb-5 cursor-pointer md:mb-10 bg-white rounded-xl flex flex-col gap-4 md:max-w-[320px] group"
     >
       {/* Skeleton Loading State */}
@@ -55,7 +69,7 @@ const PostCard = ({ data }) => {
                 className="w-full h-60 object-cover rounded-lg transition-transform duration-300 ease-in-out group-hover:scale-105"
               />
               <div
-                className="absolute w-full inset-0 font-roboto flex items-center justify-center text-white text-sm font-bold opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100 backdrop-blur-sm bg-white/20 rounded-lg"
+                className="absolute w-full inset-0 font-roboto flex items-center justify-center text-white text-md font-bold opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100 backdrop-blur-sm bg-white/20 rounded-lg"
               >
                 Read more...
               </div>
@@ -71,13 +85,13 @@ const PostCard = ({ data }) => {
           </div>
 
           {/* Post Title */}
-          <h1 className="text-2xl font-bold text-[#333333] font-raleway">
-            {postData.title.slice(0, 35) + "..."}
+          <h1 className="text-2xl font-bold text-[#333333] font-raleway"
+          dangerouslySetInnerHTML={{ __html: postData.title.slice(0, 35) + "..."}}>
           </h1>
 
           {/* Post Excerpt */}
-          <p className="text-justify text-sm text-[#999999] font-roboto">
-            {excerpt}
+          <p className="text-justify text-sm text-[#999999] font-roboto"
+           dangerouslySetInnerHTML={{ __html: excerpt}}>
           </p>
 
           <button className="text-[#7C4EE4] text-sm text-left underline font-semibold">

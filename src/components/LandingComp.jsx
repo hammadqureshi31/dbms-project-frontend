@@ -4,7 +4,7 @@ import Button from "./Button";
 import { backendPort } from "../config";
 
 const LandingComp = () => {
-  const selector = useSelector((state) => state.blogPosts.data);
+  const selector = useSelector((state) => state.blogPosts.data.posts);
   const [aiPost, setAiPost] = useState(null);
   const [vrPost, setVrPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -77,7 +77,7 @@ const LandingComp = () => {
            ring-gray-200 rounded-md relative sm:ring-0 md:px-10"
         >
           {loading ? (
-            <div className="animate-pulse h-72 bg-gray-300 rounded w-full"></div>
+            <div className="animate-pulse h-96 bg-gray-300 rounded w-full"></div>
           ) : (
             <img src={`${vrPost?.postImage}`} alt="" />
           )}
