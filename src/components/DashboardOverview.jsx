@@ -415,7 +415,7 @@ const DashboardOverview = () => {
                       </p>
                     </li>
                     {index !== logs.slice(0, 6).length - 1 && (
-                      <div className="w-full h-auto justify-center text-center pl-[98px] sm: ">
+                      <div className="w-full h-auto justify-center text-center pl-[120px] sm:pl-[98px] ">
                         <div className=" w-1 h-10 rounded-md bg-gray-200 text-gray-200"></div>
                       </div>
                     )}
