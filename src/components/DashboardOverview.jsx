@@ -382,22 +382,22 @@ const DashboardOverview = () => {
         {/* Activity List */}
         <div>
           {logs && logs.length > 0 ? (
-            <ul className="space-y-5">
+            <ul className="space-y-4">
               {logs
                 .slice()
                 .reverse()
                 .slice(0, 6)
                 .map((log, index) => (
                   <div className="max-w-md">
-                    <li key={index} className="flex justify-start text-start">
+                    <li key={index} className="flex justify-start text-left">
                       {/* Date */}
-                      <p className="text-sm font-semibold max-w-18 font-sans text-left">
+                      <p className="text-sm font-semibold w-18 font-sans text-left">
                         {formatLogDate(log.date)}
                       </p>
 
                       {/* Circle Indicator */}
                       <span
-                        className={`h-4 w-4 mx-auto sm:mx-5 border-4 rounded-full ${
+                        className={`h-4 w-4 mt-0.5 mx-auto sm:mx-5 border-4 rounded-full ${
                           log.details.toLowerCase().includes("logged in")
                             ? "border-blue-500 bg-white"
                             : log.details.toLowerCase().includes("comment")
