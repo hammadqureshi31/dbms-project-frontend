@@ -1,18 +1,20 @@
+import flowbitePlugin from 'flowbite/plugin';
+import tailwindScrollbar from 'tailwind-scrollbar';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    'node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}'
+    'node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
     extend: {},
-    fontFamily:{
+    fontFamily: {
       roboto: ["Roboto", "sans-serif"],
       raleway: ["Raleway", "sans-serif"],
       lobster: ["Lobster", "sans-serif"],
     },
   },
-  plugins: [require('flowbite/plugin'),require('tailwind-scrollbar')],
-}
-
+  plugins: [flowbitePlugin, tailwindScrollbar],
+};
